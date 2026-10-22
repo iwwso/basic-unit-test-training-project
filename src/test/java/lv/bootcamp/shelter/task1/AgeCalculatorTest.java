@@ -9,17 +9,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Task 1: Pure logic tests
+ * Task 1: Pure logic tests for AgeCalculator.
+ * Every test follows Arrange - Act - Assert.
  *
- * Practice:
- * - Arrange-Act-Assert pattern
- * - Good test naming
- * - assertEquals for return values
- * - assertThrows for invalid input
- *
- * Instructions:
- * Write tests for AgeCalculator. Each TODO describes one test to write.
- * Remove the TODO comments as you implement each test.
+ * @author Karena Litvinova
  */
 @DisplayName("AgeCalculator")
 class AgeCalculatorTest {
@@ -36,22 +29,39 @@ class AgeCalculatorTest {
     @Test
     @DisplayName("toMonths: 0 years returns 0 months")
     void shouldReturnZeroMonthsForZeroYears() {
-        // TODO: Arrange — nothing extra needed (calculator is set up in @BeforeEach)
-        // TODO: Act — call calculator.toMonths(0)
-        // TODO: Assert — assertEquals(0, result)
+        // Act
+        int result = calculator.toMonths(0);
+
+        // Assert
+        assertEquals(0, result);
     }
 
     @Test
     @DisplayName("toMonths: positive years returns correct months")
     void shouldConvertPositiveYearsToMonths() {
-        // TODO: Test that 3 years = 36 months
+        int result = calculator.toMonths(3);
+
+        assertEquals(36, result);
+    }
+
+    @Test
+    @DisplayName("toMonths: largest value that still fits in int")
+    void shouldConvertLargeValueWithoutOverflow() {
+        // Arrange: Integer.MAX_VALUE / 12 = 178 956 970 is the biggest safe input
+        int years = Integer.MAX_VALUE / 12;
+
+        int result = calculator.toMonths(years);
+
+        assertEquals(2_147_483_640, result);
     }
 
     @Test
     @DisplayName("toMonths: negative years throws IllegalArgumentException")
     void shouldThrowForNegativeYears() {
-        // TODO: Use assertThrows to verify that toMonths(-1) throws IllegalArgumentException
-        // TODO: Optionally check the exception message contains "negative"
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> calculator.toMonths(-1));
+
+        assertTrue(ex.getMessage().contains("negative"));
     }
 
     // --- dogToHumanYears() ---
@@ -59,44 +69,61 @@ class AgeCalculatorTest {
     @Test
     @DisplayName("dogToHumanYears: age 0 returns 0")
     void shouldReturnZeroHumanYearsForPuppy() {
-        // TODO: Test that dogToHumanYears(0) returns 0
+        assertEquals(0, calculator.dogToHumanYears(0));
     }
 
     @Test
     @DisplayName("dogToHumanYears: age 1 returns 15")
     void shouldReturnFifteenForOneYearOldDog() {
-        // TODO: Test that dogToHumanYears(1) returns 15
+        assertEquals(15, calculator.dogToHumanYears(1));
     }
 
     @Test
     @DisplayName("dogToHumanYears: age 2 returns 24")
     void shouldReturnTwentyFourForTwoYearOldDog() {
-        // TODO: Test that dogToHumanYears(2) returns 24
+        assertEquals(24, calculator.dogToHumanYears(2));
     }
 
     @Test
     @DisplayName("dogToHumanYears: age 5 returns 39")
     void shouldCalculateCorrectlyForOlderDog() {
-        // TODO: Test that dogToHumanYears(5) returns 24 + (5-2)*5 = 39
+        // 24 + (5 - 2) * 5 = 39
+        assertEquals(39, calculator.dogToHumanYears(5));
+    }
+
+    @ParameterizedTest(name = "dog age {0} -> {1} human years")
+    @CsvSource({
+            "0, 0",
+            "1, 15",
+            "2, 24",
+            "3, 29",
+            "10, 64"
+    })
+    @DisplayName("dogToHumanYears: every branch of the formula")
+    void shouldConvertDogAgeForEveryBranch(int dogAge, int expectedHumanYears) {
+        assertEquals(expectedHumanYears, calculator.dogToHumanYears(dogAge));
     }
 
     @Test
     @DisplayName("dogToHumanYears: negative age throws IllegalArgumentException")
     void shouldThrowForNegativeDogAge() {
-        // TODO: Use assertThrows for negative input
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> calculator.dogToHumanYears(-3));
+
+        assertTrue(ex.getMessage().contains("-3"));
     }
 
     // --- isBaby() ---
 
     @Test
     @DisplayName("isBaby: age 0 returns true")
-    void shouldReturnTrueForAgZero() {
-        // TODO: Test that isBaby(0) returns true
+    void shouldReturnTrueForAgeZero() {
+        assertTrue(calculator.isBaby(0));
     }
 
     @Test
     @DisplayName("isBaby: age 1 returns false")
     void shouldReturnFalseForAgeOne() {
-        // TODO: Test that isBaby(1) returns false
+        assertFalse(calculator.isBaby(1));
     }
 }
