@@ -175,6 +175,15 @@ class AnimalValidatorTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("Species must not be blank");
         }
+        @Test
+        @DisplayName("throws for animal with null species")
+        void shouldThrowForNullSpecies() {
+            Animal animal = new Animal("Buddy", null, 3, true, TODAY);
+
+            assertThatThrownBy(() -> validator.validate(animal))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Species must not be blank");
+        }
 
         @Test
         @DisplayName("throws for animal with negative age")

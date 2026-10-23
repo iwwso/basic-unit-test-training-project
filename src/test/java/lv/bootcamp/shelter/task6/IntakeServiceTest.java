@@ -133,6 +133,14 @@ class IntakeServiceTest {
 
             verify(repository, never()).findByName(any());
         }
+        @Test
+        @DisplayName("throws for null name without calling repository")
+        void shouldThrowForNullName() {
+            assertThatThrownBy(() -> service.findByName(null))
+                    .isInstanceOf(IllegalArgumentException.class);
+
+            verify(repository, never()).findByName(any());
+        }
     }
 
     // ==================== findBySpecies() ====================

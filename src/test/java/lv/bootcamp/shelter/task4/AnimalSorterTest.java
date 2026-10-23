@@ -35,6 +35,12 @@ class AnimalSorterTest {
         bella = new Animal("Bella", "Cat", 1, true, LocalDate.of(2026, 1, 5));
     }
 
+    @Test
+    @DisplayName("sortByName: returns empty list for null input")
+    void shouldReturnEmptyForNullInputByName() {
+        assertThat(sorter.sortByName(null)).isEmpty();
+    }
+
     // --- sortByAge ---
 
     @Test
@@ -112,6 +118,7 @@ class AnimalSorterTest {
                 .containsExactly("Alpha", "beta", "zebra");
     }
 
+
     // --- sortByIntakeDate ---
 
     @Test
@@ -125,6 +132,11 @@ class AnimalSorterTest {
         assertThat(result)
                 .extracting(Animal::getIntakeDate)
                 .isSorted();
+    }
+    @Test
+    @DisplayName("sortByIntakeDate: returns empty list for null input")
+    void shouldReturnEmptyForNullInputByDate() {
+        assertThat(sorter.sortByIntakeDate(null)).isEmpty();
     }
 
     // --- sortBySpeciesThenAgeDescending ---
@@ -140,5 +152,10 @@ class AnimalSorterTest {
         assertThat(result)
                 .extracting(Animal::getSpecies)
                 .containsExactly("Cat", "Cat", "Dog", "Dog");
+    }
+    @Test
+    @DisplayName("sortBySpeciesThenAgeDescending: returns empty list for null input")
+    void shouldReturnEmptyForNullInputBySpecies() {
+        assertThat(sorter.sortBySpeciesThenAgeDescending(null)).isEmpty();
     }
 }

@@ -110,9 +110,15 @@ class AnimalCsvParserTest {
         @Test
         @DisplayName("returns empty when name is missing")
         void shouldReturnEmptyForMissingName() {
-            assertThat(parser.parseRow(",Dog,3,true,2026-01-15")).isEmpty();
-        }
 
+            assertThat(parser.parseRow(",Dog,3,true,2026-01-15")).isEmpty();
+
+        }
+        @Test
+        @DisplayName("returns empty when species is missing")
+        void shouldReturnEmptyForMissingSpecies() {
+            assertThat(parser.parseRow("Buddy, ,3,true,2026-01-15")).isEmpty();
+        }
         @Test
         @DisplayName("returns empty when age is not a number")
         void shouldReturnEmptyForBadAge() {
@@ -194,8 +200,20 @@ class AnimalCsvParserTest {
         @Test
         @DisplayName("returns empty result for file with only a header")
         void shouldReturnEmptyForHeaderOnly() throws IOException {
+
             Path file = tempDir.resolve("header-only.csv");
             Files.writeString(file, HEADER, StandardCharsets.UTF_8);
+
+            AnimalCsvParser.ParseResult result = parser.parseFile(file);
+
+            assertThat(result.animals()).isEmpty();
+            assertThat(result.skippedRows()).isZero();
+        }
+        @Test
+        @DisplayName("returns empty result for a completely empty file")
+        void shouldReturnEmptyForEmptyFile() throws IOException {
+            Path file = tempDir.resolve("empty.csv");
+            Files.writeString(file, "", StandardCharsets.UTF_8);
 
             AnimalCsvParser.ParseResult result = parser.parseFile(file);
 

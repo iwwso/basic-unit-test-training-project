@@ -1,0 +1,79 @@
+Task 8 - Coverage check
+Author: Karyna Litvinova
+
+How I checked
+-------------
+1. Finished Tasks 1-7 (only the tests described in the TODO comments).
+2. Right-click src/test/java -> Run 'All Tests' with Coverage (IntelliJ coverage runner).
+3. Looked at the Coverage tool window and at red (not covered) / yellow (partly covered)
+   lines in the source files.
+4. For every gap I decided: add a test or leave it, and why.
+
+Uncovered branches I found
+--------------------------
+
+1) model/AnimalType.java - isSenior() and fromDisplayName() (line 29 and lines 37-46)
+   Found: the whole enum was red, no test touched it.
+   Branches: name == null / blank -> null, case-insensitive + trim match, unknown name -> null,
+   and the age boundary in isSenior (averageLifespan / 2 uses integer division: a Dog of age 7
+   is NOT senior, age 8 IS senior).
+   Decision: ADDED AnimalTypeTest. Yes, this can catch real bugs: if someone removes trim()
+   or equalsIgnoreCase(), or changes ">" to ">=", the boundary tests fail immediately.
+
+2) task5/AnimalCsvParser.java line 45 - "species.isEmpty()" part of the condition
+   Found: yellow line. The TODO tests only had a row with a missing NAME. Because of
+   short-circuit "||", the species check was never the reason for returning empty.
+   (The row ",,5,false,..." in intake.csv also stops on the name.)
+   Decision: ADDED shouldReturnEmptyForMissingSpecies. Real bug it would catch: if the species
+   check is deleted, an Animal with species "" would be created and later fail in the validator.
+
+3) task5/AnimalCsvParser.java line 85 - "header == null" (completely empty file)
+   Found: red line. The header-only test does have a header, so this branch never ran.
+   Decision: ADDED shouldReturnEmptyForEmptyFile. Cheap test; it protects against a
+   NullPointerException if someone changes the header handling.
+
+4) task4/AnimalSorter.java lines 31, 43, 55 - "animals == null" in sortByName,
+   sortByIntakeDate and sortBySpeciesThenAgeDescending
+   Found: yellow lines. Only sortByAge(null) was tested.
+   Decision: ADDED one null test for each method. Same pattern as sortByAge, but each method
+   has its own copy of the check, so each copy can break on its own.
+
+5) task6/IntakeService.java line 40 - "name == null" in findByName
+   Found: yellow line, only findByName("") was tested.
+   Decision: ADDED shouldThrowForNullName (also checks the repository is never called).
+
+6) task23/AnimalValidator.java line 49 - "species == null" in validateSpecies
+   Found: yellow line, branch coverage 93% (15/16). Tests used blank species ("" and " "),
+   never null, so the first part of the condition was never true.
+   Decision: ADDED shouldThrowForNullSpecies. If someone writes species.isBlank() without
+   the null check, the app would crash with NullPointerException instead of a clear message.
+
+7) model/Animal.java line 45 - equals(): o == null and different class branches,
+   and toString() "not vaccinated" branch
+   Found: equals was only called with equal objects (through containsExactly / Mockito).
+   Decision: ADDED AnimalTest. equals is important here: Mockito's verify(repository).save(buddy)
+   and AssertJ containsExactly depend on it, so a broken equals would make other tests lie.
+
+8) stretch/AnimalReportWriter.java lines 55 and 74 - catch (IOException e) inside forEach
+   Found: red lines.
+   Decision: NOT TESTED. To reach them the writer would have to fail in the middle of writing
+   (full disk, closed stream). That needs a fake file system or a lot of mocking for a block
+   that only wraps the exception into RuntimeException. Low chance of a real bug, high cost.
+   I accept these two lines as uncovered.
+
+Things coverage did NOT show (100% green, but still risky)
+---------------------------------------------------------
+- task1/AgeCalculator.java line 20 - years * 12 overflows int for years > 178 956 970
+  (toMonths(178_956_971) returns a negative number). Line coverage is 100%, but the boundary
+  is not safe. I added a test with the largest safe value (Integer.MAX_VALUE / 12).
+  The overflow itself is a real bug in the code; a fix would be Math.multiplyExact(years, 12).
+  I did not change production code because the task is to write tests only.
+- task4/AnimalSorter.sortByIntakeDate throws NullPointerException if an animal has
+  intakeDate == null. There is no branch for it, so coverage cannot show it.
+
+Conclusion
+----------
+Coverage helped to find real gaps (AnimalType had no tests at all, two parser conditions
+never decided the result). But 100% green does not mean "no bugs": the overflow in
+AgeCalculator is fully covered and still wrong. I added tests where a broken change could
+really happen and left only the IOException catch blocks uncovered on purpose.
